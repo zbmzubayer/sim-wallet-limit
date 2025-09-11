@@ -1,0 +1,16 @@
+version: "3.8"
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: sim-wallet-db
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=simWallet
+      - POSTGRES_USER=simWalletAdmin
+      - POSTGRES_PASSWORD=simWallet123456
+    volumes:
+      - db:/var/lib/postgresql/data
+volumes:
+  db:

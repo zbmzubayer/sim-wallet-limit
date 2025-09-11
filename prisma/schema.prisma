@@ -1,0 +1,48 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Chat {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  devices Device[]
+}
+
+model Device {
+  id        Int      @id @default(autoincrement())
+  deviceNo  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  chatId    Int
+
+  chat Chat  @relation(fields: [chatId], references: [id])
+  sims Sim[]
+}
+
+model Sim {
+  id        Int      @id @default(autoincrement())
+  simNo     Int
+  phone     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deviceId  Int?
+
+  device                  Device?                 @relation(fields: [deviceId], references: [id])
+  simTransactionHistories SimTransactionHistory[]
+}
+
+model SimTransactionHistory {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  simId Int
+  sim   Sim @relation(fields: [simId], references: [id])
+}
