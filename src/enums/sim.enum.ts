@@ -1,10 +1,10 @@
 export const SIM_TRANSACTION_OPERATION = {
-  BK_SM: "BK_SM",
-  BK_CO: "BK_CO",
-  BK_MER: "BK_MER",
-  NG_SM: "NG_SM",
-  NG_CO: "NG_CO",
-  NG_MER: "NG_MER",
+  BK_SM: "BK SM",
+  BK_CO: "BK CO",
+  BK_MER: "BK MER",
+  NG_SM: "NG SM",
+  NG_CO: "NG CO",
+  NG_MER: "NG MER",
 } as const;
 
 export const SIM_TRANSACTION_TYPE = {

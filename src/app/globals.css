@@ -76,6 +76,34 @@
   --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
   --sidebar-border: oklch(0.929 0.013 255.508);
   --sidebar-ring: oklch(0.704 0.04 256.788);
+
+  /* Device Color */
+  --device-color-1: oklch(0.694 0.243 264.376);
+  --device-color-2: oklch(0.902 0.17 162.48);
+  --device-color-3: oklch(0.984 0.188 70.08);
+  --device-color-4: oklch(0.627 0.265 303.9);
+  --device-color-5: oklch(0.645 0.246 16.439);
+  --device-color-6: oklch(0.769 0.188 70.08);
+  --device-color-7: oklch(0.902 0.17 162.48);
+  --device-color-8: oklch(0.694 0.243 264.376);
+  --device-color-9: oklch(0.627 0.265 303.9);
+  --device-color-10: oklch(0.645 0.246 16.439);
+  --device-color-11: oklch(0.769 0.188 70.08);
+  --device-color-12: oklch(0.902 0.17 162.48);
+  --device-color-13: oklch(0.694 0.243 264.376);
+  --device-color-14: oklch(0.627 0.265 303.9);
+  --device-color-15: oklch(0.645 0.246 16.439);
+  --device-color-16: oklch(0.769 0.188 70.08);
+  --device-color-17: oklch(0.902 0.17 162.48);
+  --device-color-18: oklch(0.694 0.243 264.376);
+  --device-color-19: oklch(0.627 0.265 303.9);
+  --device-color-20: oklch(0.645 0.246 16.439);
+
+  /* Sim Color */
+  --sim-color-1: oklch(0.694 0.243 264.376);
+  --sim-color-2: oklch(0.902 0.17 162.48);
+  --sim-color-3: oklch(0.984 0.188 70.08);
+  --sim-color-4: oklch(0.627 0.265 303.9);
 }
 
 .dark {
