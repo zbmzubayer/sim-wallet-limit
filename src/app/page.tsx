@@ -151,7 +151,12 @@ async function ChatTable() {
                       <TableCell className="border-x">{sim.sim.bkSM.toLocaleString()}</TableCell>
                       <TableCell className="border-x">{sim.sim.bkCO.toLocaleString()}</TableCell>
                       <TableCell className="border-x">{sim.sim.bkMER.toLocaleString()}</TableCell>
-                      <TableCell className="bg-green-100">
+                      <TableCell
+                        className={cn(
+                          "bg-green-100",
+                          sim.sim.bkBalance > 5000 && "animate-caret-blink",
+                        )}
+                      >
                         {sim.sim.ngBalance.toLocaleString()}
                       </TableCell>
                       <TableCell className="border-x">{sim.sim.ngSM.toLocaleString()}</TableCell>
