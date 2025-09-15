@@ -8,7 +8,7 @@ export function Logout() {
     <Button
       variant="outline"
       className="text-destructive hover:text-destructive"
-      onClick={async () => await signOut()}
+      onClick={async () => await signOut({ callbackUrl: "/" })}
     >
       <LogOutIcon />
       Logout
