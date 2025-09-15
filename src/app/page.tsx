@@ -16,6 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { cn } from "@/lib/cn";
 import type { ChatTableData } from "@/types/chat";
 
 function transformData(chats: ChatTableData[]) {
@@ -87,68 +88,88 @@ async function ChatTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {transformed.map((chat) =>
-              chat.devices.map((device, dIndex) =>
-                device.deviceSims.map((sim, sIndex) => (
-                  <TableRow key={sim.id}>
-                    {/* Chat title with rowspan */}
-                    {dIndex === 0 && sIndex === 0 && (
-                      <TableCell rowSpan={chat.rowCount}>{chat.title}</TableCell>
-                    )}
+            {transformed.length ? (
+              transformed.map((chat) =>
+                chat.devices.map((device, dIndex) =>
+                  device.deviceSims.map((sim, sIndex) => (
+                    <TableRow key={sim.id} className="hover:bg-muted/50">
+                      {/* Chat title with rowspan */}
+                      {dIndex === 0 && sIndex === 0 && (
+                        <TableCell rowSpan={chat.rowCount}>{chat.title}</TableCell>
+                      )}
 
-                    {/* Device no with rowspan */}
-                    {sIndex === 0 && (
+                      {/* Device no with rowspan */}
+                      {sIndex === 0 && (
+                        <TableCell
+                          rowSpan={device.rowCount}
+                          style={{
+                            borderColor: `var(--device-color-${device.deviceNo})`,
+                            backgroundColor: `color-mix(in srgb, var(--device-color-${device.deviceNo}) 20%, transparent)`,
+                          }}
+                          className="border-l-4"
+                        >
+                          DS-{device.deviceNo}
+                        </TableCell>
+                      )}
+
+                      {/* Sim info (always shown) */}
                       <TableCell
-                        rowSpan={device.rowCount}
-                        style={{
-                          borderColor: `var(--device-color-${device.deviceNo})`,
-                          backgroundColor: `color-mix(in srgb, var(--device-color-${device.deviceNo}) 20%, transparent)`,
-                        }}
-                        className="border-l-4"
+                        style={{ backgroundColor: `var(--sim-color-${sim.simNo})` }}
+                        className="p-0"
                       >
-                        DS-{device.deviceNo}
+                        <UpdateSimBalanceDialog
+                          deviceNo={device.deviceNo}
+                          simNo={sim.simNo}
+                          phone={sim.sim.phone}
+                          simId={sim.simId}
+                          bkBalance={sim.sim.bkBalance}
+                          ngBalance={sim.sim.ngBalance}
+                        />
                       </TableCell>
-                    )}
-
-                    {/* Sim info (always shown) */}
-                    <TableCell
-                      style={{ backgroundColor: `var(--sim-color-${sim.simNo})` }}
-                      className="p-0"
-                    >
-                      <UpdateSimBalanceDialog
-                        deviceNo={device.deviceNo}
-                        simNo={sim.simNo}
-                        phone={sim.sim.phone}
-                        simId={sim.simId}
-                        bkBalance={sim.sim.bkBalance}
-                        ngBalance={sim.sim.ngBalance}
-                      />
-                    </TableCell>
-                    <TableCell className="flex justify-center">
-                      <SimTransactionHistoryDialog
-                        deviceNo={device.deviceNo}
-                        simNo={sim.simNo}
-                        simId={sim.simId}
-                        bkTotalSM={sim.sim.bkSM}
-                        bkTotalCO={sim.sim.bkCO}
-                        bkTotalMER={sim.sim.bkMER}
-                        ngTotalSM={sim.sim.ngSM}
-                        ngTotalCO={sim.sim.ngCO}
-                        ngTotalMER={sim.sim.ngMER}
-                      />
-                    </TableCell>
-                    <TableCell className="border-x">{sim.sim.phone}</TableCell>
-                    <TableCell className="bg-green-100">{sim.sim.bkBalance}</TableCell>
-                    <TableCell className="border-x">{sim.sim.bkSM}</TableCell>
-                    <TableCell className="border-x">{sim.sim.bkCO}</TableCell>
-                    <TableCell className="border-x">{sim.sim.bkMER}</TableCell>
-                    <TableCell className="bg-green-100">{sim.sim.ngBalance}</TableCell>
-                    <TableCell className="border-x">{sim.sim.ngSM}</TableCell>
-                    <TableCell className="border-x">{sim.sim.ngCO}</TableCell>
-                    <TableCell className="border-x">{sim.sim.ngMER}</TableCell>
-                  </TableRow>
-                )),
-              ),
+                      <TableCell className="flex justify-center">
+                        <SimTransactionHistoryDialog
+                          deviceNo={device.deviceNo}
+                          simNo={sim.simNo}
+                          simId={sim.simId}
+                          bkTotalSM={sim.sim.bkSM}
+                          bkTotalCO={sim.sim.bkCO}
+                          bkTotalMER={sim.sim.bkMER}
+                          ngTotalSM={sim.sim.ngSM}
+                          ngTotalCO={sim.sim.ngCO}
+                          ngTotalMER={sim.sim.ngMER}
+                        />
+                      </TableCell>
+                      <TableCell className="border-x">{sim.sim.phone}</TableCell>
+                      <TableCell
+                        className={cn(
+                          "bg-green-100",
+                          sim.sim.bkBalance > 7000 && "animate-caret-blink",
+                        )}
+                      >
+                        {sim.sim.bkBalance.toLocaleString()}
+                      </TableCell>
+                      <TableCell className="border-x">{sim.sim.bkSM.toLocaleString()}</TableCell>
+                      <TableCell className="border-x">{sim.sim.bkCO.toLocaleString()}</TableCell>
+                      <TableCell className="border-x">{sim.sim.bkMER.toLocaleString()}</TableCell>
+                      <TableCell className="bg-green-100">
+                        {sim.sim.ngBalance.toLocaleString()}
+                      </TableCell>
+                      <TableCell className="border-x">{sim.sim.ngSM.toLocaleString()}</TableCell>
+                      <TableCell className="border-x">{sim.sim.ngCO.toLocaleString()}</TableCell>
+                      <TableCell className="border-x">{sim.sim.ngMER.toLocaleString()}</TableCell>
+                    </TableRow>
+                  )),
+                ),
+              )
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={13}
+                  className="text-center py-10 font-medium text-muted-foreground"
+                >
+                  No data found.
+                </TableCell>
+              </TableRow>
             )}
           </TableBody>
         </Table>

@@ -1,5 +1,7 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+
 import {
   SIM_TRANSACTION_OPERATION,
   SIM_TRANSACTION_TYPE,
@@ -53,6 +55,8 @@ export const updateSimBalance = async ({
       }),
     ]);
 
+    revalidatePath("/");
+
     return true;
   });
 };
@@ -70,6 +74,8 @@ export const clearSimTransactionHistoryBySimId = async (simId: number) => {
       tx.sim.update({
         where: { id: simId },
         data: {
+          bkBalance: 0,
+          ngBalance: 0,
           bkSM: 0,
           bkCO: 0,
           bkMER: 0,
@@ -88,6 +94,38 @@ export const clearSimTransactionHistoryBySimId = async (simId: number) => {
         where: { simId },
       }),
     ]);
+
+    revalidatePath("/");
+
+    return true;
+  });
+};
+
+export const clearAllSimTransactionHistories = async () => {
+  return await prisma.$transaction(async (tx) => {
+    await Promise.all([
+      tx.sim.updateMany({
+        data: {
+          bkBalance: 0,
+          ngBalance: 0,
+          bkSM: 0,
+          bkCO: 0,
+          bkMER: 0,
+          ngSM: 0,
+          ngCO: 0,
+          ngMER: 0,
+          bkTotalSM: 0,
+          bkTotalCO: 0,
+          bkTotalMER: 0,
+          ngTotalSM: 0,
+          ngTotalCO: 0,
+          ngTotalMER: 0,
+        },
+      }),
+      tx.simTransactionHistory.deleteMany(),
+    ]);
+
+    revalidatePath("/");
 
     return true;
   });

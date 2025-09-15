@@ -5,7 +5,6 @@ import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import { invalidateChats } from "@/actions/chat.action";
 import { updateSimBalance } from "@/actions/sim.action";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,6 +29,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { SIM_TRANSACTION_OPERATION } from "@/enums/sim.enum";
 import { cn } from "@/lib/cn";
+import { getQueryClient } from "@/lib/get-query-client";
 import { type SimBalanceDto, simBalanceSchema } from "@/validations/sim.dto";
 
 interface UpdateSimBalanceFormProps {
@@ -47,6 +47,7 @@ export function UpdateSimBalanceForm({
   ngBalance,
   close,
 }: UpdateSimBalanceFormProps) {
+  const queryClient = getQueryClient();
   const form = useForm({
     resolver: zodResolver(simBalanceSchema),
     defaultValues: { note: "" },
@@ -65,9 +66,9 @@ export function UpdateSimBalanceForm({
   const { mutateAsync, isPending } = useMutation({
     mutationFn: updateSimBalance,
     onSuccess: () => {
-      invalidateChats();
       toast.success("Balance updated successfully");
       close();
+      queryClient.invalidateQueries({ queryKey: [simId] });
     },
     onError: (error) => {
       toast.error("Failed to update balance", {
@@ -77,8 +78,6 @@ export function UpdateSimBalanceForm({
   });
 
   const onSubmit = async (values: SimBalanceDto) => {
-    console.log(values);
-    // setOpen(false);
     await mutateAsync({ id: simId, payload: values });
   };
 

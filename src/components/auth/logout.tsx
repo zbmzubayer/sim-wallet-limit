@@ -5,7 +5,11 @@ import { Button } from "@/components/ui/button";
 
 export function Logout() {
   return (
-    <Button variant="destructive" onClick={async () => await signOut()}>
+    <Button
+      variant="outline"
+      className="text-destructive hover:text-destructive"
+      onClick={async () => await signOut()}
+    >
       <LogOutIcon />
       Logout
     </Button>
