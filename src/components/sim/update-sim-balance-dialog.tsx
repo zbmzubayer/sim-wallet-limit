@@ -33,7 +33,7 @@ export function UpdateSimBalanceDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger className="w-full py-2">Sim {simNo}</DialogTrigger>
-      <DialogContent className="sm:max-w-sm">
+      <DialogContent className="sm:max-w-sm" onInteractOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle>
             Edit Sim Balance - DS-{deviceNo} Sim {simNo}

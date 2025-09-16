@@ -154,7 +154,7 @@ async function ChatTable() {
                       <TableCell
                         className={cn(
                           "bg-green-100",
-                          sim.sim.bkBalance > 5000 && "animate-caret-blink",
+                          sim.sim.ngBalance > 5000 && "animate-caret-blink",
                         )}
                       >
                         {sim.sim.ngBalance.toLocaleString()}
