@@ -19,22 +19,6 @@ import {
 import { cn } from "@/lib/cn";
 import type { ChatTableData } from "@/types/chat";
 
-function transformData(chats: ChatTableData[]) {
-  return chats.map((chat) => {
-    // total rows = sum of all sims in all devices
-    const chatRowCount = chat.devices.reduce((sum, device) => sum + device.deviceSims.length, 0);
-
-    return {
-      ...chat,
-      rowCount: chatRowCount,
-      devices: chat.devices.map((device) => ({
-        ...device,
-        rowCount: device.deviceSims.length,
-      })),
-    };
-  });
-}
-
 export default async function Home() {
   const session = await auth();
 
@@ -62,9 +46,78 @@ export default async function Home() {
   );
 }
 
+function transformData(chats: ChatTableData[]) {
+  // sort data by bkBalance desc, ngBalance desc maintaining the chat and device relationship
+  // for example: if a sim in device 2 in chat 1 has the highest balance, it should still be in device 2 and chat 1
+  // but device 2 should be moved to the top of chat 1
+  // and within device 2, the sims should be sorted by bkBalance desc, ngBalance desc
+  // same goes for chat level
+  // If a sim in certain device has the highest value, that chat should be moved to the top
+  // Helper function to get the maximum balance between bkBalance and ngBalance
+  const getMaxBalance = (deviceSim: ChatTableData["devices"][number]["deviceSims"][number]) => {
+    return Math.max(deviceSim.sim.bkBalance || 0, deviceSim.sim.ngBalance || 0);
+  };
+
+  return chats
+    .map((chat) => {
+      const sortedDevices = chat.devices
+        .map((device) => {
+          // Sort SIMs within each device by their maximum balance (descending)
+          const sortedSims = [...device.deviceSims].sort((a, b) => {
+            const maxBalanceA = getMaxBalance(a);
+            const maxBalanceB = getMaxBalance(b);
+
+            if (maxBalanceA !== maxBalanceB) {
+              return maxBalanceB - maxBalanceA; // Descending order
+            }
+
+            // If max balances are equal, sort by bkBalance first, then ngBalance
+            if (a.sim.bkBalance !== b.sim.bkBalance) {
+              return b.sim.bkBalance - a.sim.bkBalance;
+            }
+
+            return b.sim.ngBalance - a.sim.ngBalance;
+          });
+
+          return {
+            ...device,
+            deviceSims: sortedSims,
+            rowCount: sortedSims.length,
+          };
+        })
+        .sort((a, b) => {
+          // Sort devices by their top SIM's maximum balance
+          if (a.deviceSims.length === 0) return 1;
+          if (b.deviceSims.length === 0) return -1;
+
+          const maxBalanceA = getMaxBalance(a.deviceSims[0]);
+          const maxBalanceB = getMaxBalance(b.deviceSims[0]);
+          return maxBalanceB - maxBalanceA;
+        });
+
+      const chatRowCount = sortedDevices.reduce((sum, device) => sum + device.deviceSims.length, 0);
+
+      return {
+        ...chat,
+        devices: sortedDevices,
+        rowCount: chatRowCount,
+      };
+    })
+    .sort((a, b) => {
+      // Sort chats by their top device's top SIM's maximum balance
+      if (a.devices.length === 0 || a.devices[0].deviceSims.length === 0) return 1;
+      if (b.devices.length === 0 || b.devices[0].deviceSims.length === 0) return -1;
+
+      const maxBalanceA = getMaxBalance(a.devices[0].deviceSims[0]);
+      const maxBalanceB = getMaxBalance(b.devices[0].deviceSims[0]);
+      return maxBalanceB - maxBalanceA;
+    });
+}
+
 async function ChatTable() {
   const chats = await getAllChats();
   const transformed = transformData(chats);
+
   return (
     <main className="container gap-2 py-5 max-h-[calc(100vh-4rem)] overflow-auto">
       {/* <UpdateSimBalanceForm /> */}
@@ -131,12 +184,12 @@ async function ChatTable() {
                           deviceNo={device.deviceNo}
                           simNo={sim.simNo}
                           simId={sim.simId}
-                          bkTotalSM={sim.sim.bkSM}
-                          bkTotalCO={sim.sim.bkCO}
-                          bkTotalMER={sim.sim.bkMER}
-                          ngTotalSM={sim.sim.ngSM}
-                          ngTotalCO={sim.sim.ngCO}
-                          ngTotalMER={sim.sim.ngMER}
+                          bkTotalSM={sim.sim.bkTotalSM}
+                          bkTotalCO={sim.sim.bkTotalCO}
+                          bkTotalMER={sim.sim.bkTotalMER}
+                          ngTotalSM={sim.sim.ngTotalSM}
+                          ngTotalCO={sim.sim.ngTotalCO}
+                          ngTotalMER={sim.sim.ngTotalMER}
                         />
                       </TableCell>
                       <TableCell className="border-x">{sim.sim.phone}</TableCell>

@@ -23,28 +23,28 @@ export const updateSimBalance = async ({
 
   if (operation === SIM_TRANSACTION_OPERATION.BK_SM) {
     simUpdateData.bkBalance = { decrement: total };
-    simUpdateData.bkSM = { increment: total };
-    simUpdateData.bkTotalSM = { increment: total };
+    simUpdateData.bkSM = { increment: amount };
+    simUpdateData.bkTotalSM = { increment: amount };
   } else if (operation === SIM_TRANSACTION_OPERATION.BK_CO) {
     simUpdateData.bkBalance = { decrement: total };
-    simUpdateData.bkCO = { increment: total };
-    simUpdateData.bkTotalCO = { increment: total };
+    simUpdateData.bkCO = { increment: amount };
+    simUpdateData.bkTotalCO = { increment: amount };
   } else if (operation === SIM_TRANSACTION_OPERATION.BK_MER) {
     simUpdateData.bkBalance = { decrement: total };
-    simUpdateData.bkMER = { increment: total };
-    simUpdateData.bkTotalMER = { increment: total };
+    simUpdateData.bkMER = { increment: amount };
+    simUpdateData.bkTotalMER = { increment: amount };
   } else if (operation === SIM_TRANSACTION_OPERATION.NG_SM) {
     simUpdateData.ngBalance = { decrement: total };
-    simUpdateData.ngSM = { increment: total };
-    simUpdateData.ngTotalSM = { increment: total };
+    simUpdateData.ngSM = { increment: amount };
+    simUpdateData.ngTotalSM = { increment: amount };
   } else if (operation === SIM_TRANSACTION_OPERATION.NG_CO) {
     simUpdateData.ngBalance = { decrement: total };
-    simUpdateData.ngCO = { increment: total };
-    simUpdateData.ngTotalCO = { increment: total };
+    simUpdateData.ngCO = { increment: amount };
+    simUpdateData.ngTotalCO = { increment: amount };
   } else if (operation === SIM_TRANSACTION_OPERATION.NG_MER) {
     simUpdateData.ngBalance = { decrement: total };
-    simUpdateData.ngMER = { increment: total };
-    simUpdateData.ngTotalMER = { increment: total };
+    simUpdateData.ngMER = { increment: amount };
+    simUpdateData.ngTotalMER = { increment: amount };
   }
 
   return await prisma.$transaction(async (tx) => {
