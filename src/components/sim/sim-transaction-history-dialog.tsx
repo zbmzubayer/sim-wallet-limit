@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table/data-table";
+import type { FilterField } from "@/components/ui/data-table/data-table-toolbar";
 import {
   Dialog,
   DialogContent,
@@ -32,6 +33,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
+import { SIM_TRANSACTION_OPERATION, SIM_TRANSACTION_TYPE } from "@/enums/sim.enum";
 import { cn } from "@/lib/cn";
 import { getQueryClient } from "@/lib/get-query-client";
 
@@ -127,6 +129,25 @@ function ClearTransactionHistoryAlertDialog({ simId }: { simId: number }) {
   );
 }
 
+const filterFields: FilterField[] = [
+  {
+    column: "type",
+    title: "Type",
+    options: [
+      { label: SIM_TRANSACTION_TYPE.IN, value: SIM_TRANSACTION_TYPE.IN },
+      { label: SIM_TRANSACTION_TYPE.OUT, value: SIM_TRANSACTION_TYPE.OUT },
+    ],
+  },
+  {
+    column: "operation",
+    title: "Operation",
+    options: Object.values(SIM_TRANSACTION_OPERATION).map((operation) => ({
+      label: operation,
+      value: operation,
+    })),
+  },
+];
+
 function SimTransactionHistoryTable({ simId }: { simId: number }) {
   const { data, isFetching } = useQuery({
     queryKey: [simId],
@@ -136,6 +157,10 @@ function SimTransactionHistoryTable({ simId }: { simId: number }) {
   return isFetching ? (
     <Spinner className="flex h-full w-full items-center justify-center" />
   ) : (
-    <DataTable columns={simTransactionHistoryColumns} data={data || []} />
+    <DataTable
+      columns={simTransactionHistoryColumns}
+      data={data || []}
+      filterFields={filterFields}
+    />
   );
 }
