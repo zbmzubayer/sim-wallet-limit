@@ -1,8 +1,19 @@
 "use client";
 
 import type { ColumnDef, FilterFn } from "@tanstack/react-table";
+import { EditIcon } from "lucide-react";
 import type { DateRange } from "react-day-picker";
 
+import { UpdateTransactionHistoryNoteForm } from "@/components/sim/update-transaction-history-form";
+import { Button } from "@/components/ui/button";
+import {
+  DialogContent,
+  DialogHeader,
+  DialogProvider,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { SIM_TRANSACTION_TYPE } from "@/enums/sim.enum";
 import type { SimTransactionHistory } from "@/generated/prisma";
 import { cn } from "@/lib/cn";
 
@@ -28,7 +39,10 @@ export const simTransactionHistoryColumns: ColumnDef<SimTransactionHistory>[] = 
     accessorKey: "operation",
     header: "Operation",
     enableSorting: false,
-    filterFn: "arrIncludesSome",
+    filterFn: (row, _columnId, filterValue: string[]) => {
+      if (filterValue.length === 0) return true;
+      return filterValue.includes(row.original.operation);
+    },
   },
   {
     accessorKey: "amount",
@@ -62,15 +76,35 @@ export const simTransactionHistoryColumns: ColumnDef<SimTransactionHistory>[] = 
     accessorKey: "createdAt",
     header: "Date",
     cell: ({ row }) => (
-      <span className="text-xs font-mono text-muted-foreground">
-        {new Date(row.original.createdAt).toLocaleString()}
+      <span className="text-[11px] tabular-nums text-muted-foreground">
+        {row.original.createdAt.toLocaleString()}
       </span>
     ),
     filterFn: (row, _columnId, filterValue: DateRange) => {
       const createdAt = new Date(row.original.createdAt);
       if (!(filterValue.from && filterValue.to)) return true;
-      console.log(filterValue);
       return createdAt >= filterValue.from && createdAt <= filterValue.to;
     },
+  },
+  {
+    accessorKey: "action",
+    header: "Action",
+    enableSorting: false,
+    cell: ({ row }) =>
+      row.original.type === SIM_TRANSACTION_TYPE.OUT ? (
+        <DialogProvider>
+          <DialogTrigger asChild>
+            <Button className="size-8" variant="outline">
+              <EditIcon className="text-yellow-500" />
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-md" onOpenAutoFocus={(e) => e.preventDefault()}>
+            <DialogHeader>
+              <DialogTitle>Edit Transaction</DialogTitle>
+            </DialogHeader>
+            <UpdateTransactionHistoryNoteForm transaction={row.original} />
+          </DialogContent>
+        </DialogProvider>
+      ) : null,
   },
 ];

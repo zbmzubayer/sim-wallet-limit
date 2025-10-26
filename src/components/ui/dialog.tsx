@@ -144,12 +144,6 @@ function DialogProvider({ ...props }: React.ComponentProps<typeof Root>) {
   );
 }
 
-function DialogProviderTrigger({ ...props }: React.ComponentProps<typeof Trigger>) {
-  const { setOpen } = useDialog();
-
-  return <Trigger data-slot="dialog-provider-trigger" onClick={() => setOpen(true)} {...props} />;
-}
-
 export {
   Dialog,
   DialogClose,
@@ -163,5 +157,4 @@ export {
   DialogTrigger,
   useDialog,
   DialogProvider,
-  DialogProviderTrigger,
 };

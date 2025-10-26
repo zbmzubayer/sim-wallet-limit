@@ -67,7 +67,7 @@ export function SimTransactionHistoryDialog({
           <EyeIcon />
         </Button>
       </DialogTrigger>
-      <DialogContent className="flex flex-col gap-0 p-0 sm:max-w-4xl">
+      <DialogContent className="flex flex-col gap-0 p-0 sm:max-w-5xl">
         <div className="overflow-y-auto p-6">
           <DialogHeader className="mb-3 flex-row items-center gap-5">
             <DialogTitle>
@@ -75,13 +75,25 @@ export function SimTransactionHistoryDialog({
             </DialogTitle>
             <ClearTransactionHistoryAlertDialog simId={simId} />
           </DialogHeader>
-          <div className="flex items-center gap-3 mb-2 text-xs">
-            <div className="rounded-md border-2 px-2 py-1">Total BK SM: {bkTotalSM}</div>
-            <div className="rounded-md border-2 px-2 py-1">Total BK CO: {bkTotalCO}</div>
-            <div className="rounded-md border-2 px-2 py-1">Total BK MER: {bkTotalMER}</div>
-            <div className="rounded-md border-2 px-2 py-1">Total NG SM: {ngTotalSM}</div>
-            <div className="rounded-md border-2 px-2 py-1">Total NG CO: {ngTotalCO}</div>
-            <div className="rounded-md border-2 px-2 py-1">Total NG MER: {ngTotalMER}</div>
+          <div className="flex items-center gap-3 mb-2 tabular-nums text-xs">
+            <div className="rounded-md border-2 px-2 py-1">
+              Total BK SM: {bkTotalSM.toLocaleString()}
+            </div>
+            <div className="rounded-md border-2 px-2 py-1">
+              Total BK CO: {bkTotalCO.toLocaleString()}
+            </div>
+            <div className="rounded-md border-2 px-2 py-1">
+              Total BK MER: {bkTotalMER.toLocaleString()}
+            </div>
+            <div className="rounded-md border-2 px-2 py-1">
+              Total NG SM: {ngTotalSM.toLocaleString()}
+            </div>
+            <div className="rounded-md border-2 px-2 py-1">
+              Total NG CO: {ngTotalCO.toLocaleString()}
+            </div>
+            <div className="rounded-md border-2 px-2 py-1">
+              Total NG MER: {ngTotalMER.toLocaleString()}
+            </div>
           </div>
           <SimTransactionHistoryTable simId={simId} />
         </div>
@@ -141,16 +153,20 @@ const filterFields: FilterField[] = [
   {
     column: "operation",
     title: "Operation",
-    options: Object.values(SIM_TRANSACTION_OPERATION).map((operation) => ({
-      label: operation,
-      value: operation,
-    })),
+    options: [
+      { label: "BK", value: "BK" },
+      { label: "NG", value: "NG" },
+      ...Object.values(SIM_TRANSACTION_OPERATION).map((operation) => ({
+        label: operation,
+        value: operation,
+      })),
+    ],
   },
 ];
 
 function SimTransactionHistoryTable({ simId }: { simId: number }) {
   const { data, isFetching } = useQuery({
-    queryKey: [simId],
+    queryKey: ["transactions", simId],
     queryFn: () => getTransactionHistoryBySimId(simId),
   });
 

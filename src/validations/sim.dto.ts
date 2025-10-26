@@ -10,3 +10,9 @@ export const simBalanceSchema = z.object({
 });
 
 export type SimBalanceDto = z.infer<typeof simBalanceSchema>;
+
+export const simTransactionNoteSchema = z.object({
+  note: z.string().max(255, "Note must be at most 255 characters").optional(),
+});
+
+export type SimTransactionNoteDto = z.infer<typeof simTransactionNoteSchema>;

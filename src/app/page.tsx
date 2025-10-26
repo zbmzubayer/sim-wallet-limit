@@ -3,20 +3,10 @@ import { Suspense } from "react";
 import { getAllChats } from "@/actions/chat.action";
 import auth from "@/auth";
 import { LoginForm } from "@/components/auth/login-form";
+import { ChatTable } from "@/components/chat/chat-table";
 import { Header } from "@/components/header";
-import { SimTransactionHistoryDialog } from "@/components/sim/sim-transaction-history-dialog";
-import { UpdateSimBalanceDialog } from "@/components/sim/update-sim-balance-dialog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { cn } from "@/lib/cn";
 import type { ChatTableData } from "@/types/chat";
 
 export default async function Home() {
@@ -25,7 +15,7 @@ export default async function Home() {
   return session?.user ? (
     <>
       <Header />
-      <ChatTable />
+      <ChatData />
     </>
   ) : (
     <main className="container flex h-screen flex-col items-center justify-center gap-2">
@@ -114,124 +104,60 @@ function transformData(chats: ChatTableData[]) {
     });
 }
 
-async function ChatTable() {
+export type TransformChatData = ReturnType<typeof transformData>;
+
+function getTotals(chats: ChatTableData[]) {
+  const simSet = new Set<number>();
+  let totalBkBalance = 0;
+  let totalBK_SM = 0;
+  let totalBK_CO = 0;
+  let totalBK_MER = 0;
+  let totalNgBalance = 0;
+  let totalNG_SM = 0;
+  let totalNG_CO = 0;
+  let totalNG_MER = 0;
+
+  chats.forEach((chat) => {
+    chat.devices.forEach((device) => {
+      device.deviceSims.forEach((sim) => {
+        const simKey = sim.simId;
+        if (!simSet.has(simKey)) {
+          simSet.add(simKey);
+          totalBkBalance += sim.sim.bkBalance || 0;
+          totalNgBalance += sim.sim.ngBalance || 0;
+          totalBK_SM += sim.sim.bkSM || 0;
+          totalBK_CO += sim.sim.bkCO || 0;
+          totalBK_MER += sim.sim.bkMER || 0;
+          totalNG_SM += sim.sim.ngSM || 0;
+          totalNG_CO += sim.sim.ngCO || 0;
+          totalNG_MER += sim.sim.ngMER || 0;
+        }
+      });
+    });
+  });
+
+  return {
+    totalBkBalance,
+    totalBK_SM,
+    totalBK_CO,
+    totalBK_MER,
+    totalNgBalance,
+    totalNG_SM,
+    totalNG_CO,
+    totalNG_MER,
+  };
+}
+
+export type Totals = ReturnType<typeof getTotals>;
+
+async function ChatData() {
   const chats = await getAllChats();
   const transformed = transformData(chats);
+  const totals = getTotals(chats);
 
   return (
     <main className="container gap-2 py-5 max-h-[calc(100vh-4rem)] overflow-auto">
-      {/* <UpdateSimBalanceForm /> */}
-      <div className="overflow-hidden rounded-md border w-full">
-        <Table>
-          <TableHeader className="bg-blue-500">
-            <TableRow className="*:border-x">
-              <TableHead className="text-white">Chat / Group</TableHead>
-              <TableHead className="text-white">Device No</TableHead>
-              <TableHead className="text-white">Sim No</TableHead>
-              <TableHead className="text-white">History</TableHead>
-              <TableHead className="text-white">Phone</TableHead>
-              <TableHead className="text-white">BK Balance</TableHead>
-              <TableHead className="text-white">BK SM</TableHead>
-              <TableHead className="text-white">BK CO</TableHead>
-              <TableHead className="text-white">BK MER</TableHead>
-              <TableHead className="text-white">NG Balance</TableHead>
-              <TableHead className="text-white">NG SM</TableHead>
-              <TableHead className="text-white">NG CO</TableHead>
-              <TableHead className="text-white">NG MER</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {transformed.length ? (
-              transformed.map((chat) =>
-                chat.devices.map((device, dIndex) =>
-                  device.deviceSims.map((sim, sIndex) => (
-                    <TableRow key={sim.id} className="hover:bg-muted/50">
-                      {/* Chat title with rowspan */}
-                      {dIndex === 0 && sIndex === 0 && (
-                        <TableCell rowSpan={chat.rowCount}>{chat.title}</TableCell>
-                      )}
-
-                      {/* Device no with rowspan */}
-                      {sIndex === 0 && (
-                        <TableCell
-                          rowSpan={device.rowCount}
-                          style={{
-                            borderColor: `var(--device-color-${device.deviceNo})`,
-                            backgroundColor: `color-mix(in srgb, var(--device-color-${device.deviceNo}) 20%, transparent)`,
-                          }}
-                          className="border-l-4"
-                        >
-                          DS-{device.deviceNo}
-                        </TableCell>
-                      )}
-
-                      {/* Sim info (always shown) */}
-                      <TableCell
-                        style={{ backgroundColor: `var(--sim-color-${sim.simNo})` }}
-                        className="p-0"
-                      >
-                        <UpdateSimBalanceDialog
-                          deviceNo={device.deviceNo}
-                          simNo={sim.simNo}
-                          phone={sim.sim.phone}
-                          simId={sim.simId}
-                          bkBalance={sim.sim.bkBalance}
-                          ngBalance={sim.sim.ngBalance}
-                        />
-                      </TableCell>
-                      <TableCell className="flex justify-center">
-                        <SimTransactionHistoryDialog
-                          deviceNo={device.deviceNo}
-                          simNo={sim.simNo}
-                          simId={sim.simId}
-                          bkTotalSM={sim.sim.bkTotalSM}
-                          bkTotalCO={sim.sim.bkTotalCO}
-                          bkTotalMER={sim.sim.bkTotalMER}
-                          ngTotalSM={sim.sim.ngTotalSM}
-                          ngTotalCO={sim.sim.ngTotalCO}
-                          ngTotalMER={sim.sim.ngTotalMER}
-                        />
-                      </TableCell>
-                      <TableCell className="border-x">{sim.sim.phone}</TableCell>
-                      <TableCell
-                        className={cn(
-                          "bg-green-100",
-                          sim.sim.bkBalance > 5000 && "animate-caret-blink",
-                        )}
-                      >
-                        {sim.sim.bkBalance.toLocaleString()}
-                      </TableCell>
-                      <TableCell className="border-x">{sim.sim.bkSM.toLocaleString()}</TableCell>
-                      <TableCell className="border-x">{sim.sim.bkCO.toLocaleString()}</TableCell>
-                      <TableCell className="border-x">{sim.sim.bkMER.toLocaleString()}</TableCell>
-                      <TableCell
-                        className={cn(
-                          "bg-green-100",
-                          sim.sim.ngBalance > 5000 && "animate-caret-blink",
-                        )}
-                      >
-                        {sim.sim.ngBalance.toLocaleString()}
-                      </TableCell>
-                      <TableCell className="border-x">{sim.sim.ngSM.toLocaleString()}</TableCell>
-                      <TableCell className="border-x">{sim.sim.ngCO.toLocaleString()}</TableCell>
-                      <TableCell className="border-x">{sim.sim.ngMER.toLocaleString()}</TableCell>
-                    </TableRow>
-                  )),
-                ),
-              )
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={13}
-                  className="text-center py-10 font-medium text-muted-foreground"
-                >
-                  No data found.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+      <ChatTable transformed={transformed} totals={totals} />
     </main>
   );
 }
