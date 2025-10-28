@@ -67,7 +67,7 @@ export function ChatTable({ transformed, totals }: ChatTableProps) {
               Filter by Device
             </Button>
           </PopoverTrigger>
-          <PopoverContent align="start" className="w-[200px] p-0">
+          <PopoverContent align="start" className="w-[300px] p-0">
             <Command>
               <CommandInput placeholder="Search devices..." />
               <CommandList>
@@ -123,28 +123,28 @@ export function ChatTable({ transformed, totals }: ChatTableProps) {
         </Popover>
         <div className="flex items-center gap-2 tabular-nums text-xs">
           <div className="rounded-md border-2 px-2 py-1">
-            Total BK Balance: {totals.totalBkBalance.toLocaleString()}
+            BK Balance: {totals.totalBkBalance.toLocaleString()}
           </div>
           <div className="rounded-md border-2 px-2 py-1">
-            Total BK SM: {totals.totalBK_SM.toLocaleString()}
+            BK SM: {totals.totalBK_SM.toLocaleString()}
           </div>
           <div className="rounded-md border-2 px-2 py-1">
-            Total BK CO: {totals.totalBK_CO.toLocaleString()}
+            BK CO: {totals.totalBK_CO.toLocaleString()}
           </div>
           <div className="rounded-md border-2 px-2 py-1">
-            Total BK MER: {totals.totalBK_MER.toLocaleString()}
+            BK MER: {totals.totalBK_MER.toLocaleString()}
           </div>
           <div className="rounded-md border-2 px-2 py-1">
-            Total NG Balance: {totals.totalNgBalance.toLocaleString()}
+            NG Balance: {totals.totalNgBalance.toLocaleString()}
           </div>
           <div className="rounded-md border-2 px-2 py-1">
-            Total NG SM: {totals.totalNG_SM.toLocaleString()}
+            NG SM: {totals.totalNG_SM.toLocaleString()}
           </div>
           <div className="rounded-md border-2 px-2 py-1">
-            Total NG CO: {totals.totalNG_CO.toLocaleString()}
+            NG CO: {totals.totalNG_CO.toLocaleString()}
           </div>
           <div className="rounded-md border-2 px-2 py-1">
-            Total NG MER: {totals.totalNG_MER.toLocaleString()}
+            NG MER: {totals.totalNG_MER.toLocaleString()}
           </div>
         </div>
       </div>

@@ -123,8 +123,8 @@ function getTotals(chats: ChatTableData[]) {
         const simKey = sim.simId;
         if (!simSet.has(simKey)) {
           simSet.add(simKey);
-          totalBkBalance += sim.sim.bkBalance || 0;
-          totalNgBalance += sim.sim.ngBalance || 0;
+          totalBkBalance += sim.sim.bkBalance > 0 ? sim.sim.bkBalance : 0;
+          totalNgBalance += sim.sim.ngBalance > 0 ? sim.sim.ngBalance : 0;
           totalBK_SM += sim.sim.bkSM || 0;
           totalBK_CO += sim.sim.bkCO || 0;
           totalBK_MER += sim.sim.bkMER || 0;
