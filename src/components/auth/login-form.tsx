@@ -36,7 +36,7 @@ export function LoginForm() {
 
   const onSubmit = async (values: LoginDto) => {
     setIsLoading(true);
-    const callbackUrl = searchParams.get("callbackUrl") || "/";
+    const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
     const res = await signIn("credentials", {
       username: values.username,
       password: values.password,

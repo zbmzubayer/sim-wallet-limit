@@ -4,7 +4,7 @@ import type { ColumnDef, FilterFn } from "@tanstack/react-table";
 import { EditIcon } from "lucide-react";
 import type { DateRange } from "react-day-picker";
 
-import { UpdateTransactionHistoryNoteForm } from "@/components/sim/update-transaction-history-form";
+import { UpdateTransactionHistoryForm } from "@/components/sim/update-transaction-history-form";
 import { Button } from "@/components/ui/button";
 import {
   DialogContent,
@@ -73,6 +73,11 @@ export const simTransactionHistoryColumns: ColumnDef<SimTransactionHistory>[] = 
     filterFn: multiColumnFilterFn,
   },
   {
+    accessorKey: "operatedBy",
+    header: "Operated By",
+    enableSorting: false,
+  },
+  {
     accessorKey: "createdAt",
     header: "Date",
     cell: ({ row }) => (
@@ -102,7 +107,7 @@ export const simTransactionHistoryColumns: ColumnDef<SimTransactionHistory>[] = 
             <DialogHeader>
               <DialogTitle>Edit Transaction</DialogTitle>
             </DialogHeader>
-            <UpdateTransactionHistoryNoteForm transaction={row.original} />
+            <UpdateTransactionHistoryForm transaction={row.original} />
           </DialogContent>
         </DialogProvider>
       ) : null,

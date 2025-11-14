@@ -5,7 +5,7 @@ import { CheckIcon, FilterIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { getAllDevices } from "@/actions/sim.action";
-import type { Totals, TransformChatData } from "@/app/page";
+import type { Totals, TransformChatData } from "@/app/(admin)/dashboard/page";
 import { SimTransactionHistoryDialog } from "@/components/sim/sim-transaction-history-dialog";
 import { UpdateSimBalanceDialog } from "@/components/sim/update-sim-balance-dialog";
 import { Button } from "@/components/ui/button";
@@ -28,13 +28,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/cn";
+import type { SimLimit } from "@/types";
 
 interface ChatTableProps {
   transformed: TransformChatData;
   totals: Totals;
+  limits: SimLimit;
 }
 
-export function ChatTable({ transformed, totals }: ChatTableProps) {
+export function ChatTable({ transformed, totals, limits }: ChatTableProps) {
   const { data } = useQuery({
     queryKey: ["devices"],
     queryFn: getAllDevices,
@@ -49,10 +51,14 @@ export function ChatTable({ transformed, totals }: ChatTableProps) {
     }
     return transformed
       .map((chat) => {
+        let rowCount = 0;
         const filteredDeviceSims = chat.devices
           .filter((device) => selectedValues.includes(device.id))
-          .map((device) => device);
-        return { ...chat, devices: filteredDeviceSims };
+          .map((device) => {
+            rowCount += device.deviceSims.length;
+            return device;
+          });
+        return { ...chat, devices: filteredDeviceSims, rowCount };
       })
       .filter((chat) => chat.devices.length > 0);
   }, [selectedValues, transformed]);
@@ -121,7 +127,7 @@ export function ChatTable({ transformed, totals }: ChatTableProps) {
             </Command>
           </PopoverContent>
         </Popover>
-        <div className="flex items-center gap-2 tabular-nums text-xs">
+        <div className="flex items-center gap-2 tabular-nums text-xs text-nowrap overflow-auto">
           <div className="rounded-md border-2 px-2 py-1">
             BK Balance: {totals.totalBkBalance.toLocaleString()}
           </div>
@@ -234,8 +240,24 @@ export function ChatTable({ transformed, totals }: ChatTableProps) {
                       >
                         {sim.sim.bkBalance.toLocaleString()}
                       </TableCell>
-                      <TableCell className="border-x">{sim.sim.bkSM.toLocaleString()}</TableCell>
-                      <TableCell className="border-x">{sim.sim.bkCO.toLocaleString()}</TableCell>
+                      <TableCell
+                        className={cn(
+                          "border-x",
+                          sim.sim.bkTotalSM > limits.bkSMLimit &&
+                            "animate-caret-blink text-red-500",
+                        )}
+                      >
+                        {sim.sim.bkSM.toLocaleString()}
+                      </TableCell>
+                      <TableCell
+                        className={cn(
+                          "border-x",
+                          sim.sim.bkTotalCO > limits.bkCOLimit &&
+                            "animate-caret-blink text-red-500",
+                        )}
+                      >
+                        {sim.sim.bkCO.toLocaleString()}
+                      </TableCell>
                       <TableCell className="border-x">{sim.sim.bkMER.toLocaleString()}</TableCell>
                       <TableCell
                         className={cn(
@@ -245,8 +267,24 @@ export function ChatTable({ transformed, totals }: ChatTableProps) {
                       >
                         {sim.sim.ngBalance.toLocaleString()}
                       </TableCell>
-                      <TableCell className="border-x">{sim.sim.ngSM.toLocaleString()}</TableCell>
-                      <TableCell className="border-x">{sim.sim.ngCO.toLocaleString()}</TableCell>
+                      <TableCell
+                        className={cn(
+                          "border-x",
+                          sim.sim.ngTotalSM > limits.ngSMLimit &&
+                            "animate-caret-blink text-red-500",
+                        )}
+                      >
+                        {sim.sim.ngSM.toLocaleString()}
+                      </TableCell>
+                      <TableCell
+                        className={cn(
+                          "border-x",
+                          sim.sim.ngTotalCO > limits.ngCOLimit &&
+                            "animate-caret-blink text-red-500",
+                        )}
+                      >
+                        {sim.sim.ngCO.toLocaleString()}
+                      </TableCell>
                       <TableCell className="border-x">{sim.sim.ngMER.toLocaleString()}</TableCell>
                     </TableRow>
                   )),

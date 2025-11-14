@@ -1,6 +1,5 @@
 "use client";
 
-import type { Table } from "@tanstack/react-table";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -9,6 +8,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { useDataTable } from "@/components/ui/data-table/data-table-provider";
 import {
   Select,
   SelectContent,
@@ -17,11 +17,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-interface DataTablePaginationProps<TData> {
-  table: Table<TData>;
-}
+export function DataTablePagination() {
+  const { table } = useDataTable();
 
-export function DataTablePagination<TData>({ table }: DataTablePaginationProps<TData>) {
   return (
     <div className="mx-2 flex items-center justify-between">
       <div className="flex-1 text-muted-foreground text-sm">
@@ -42,7 +40,7 @@ export function DataTablePagination<TData>({ table }: DataTablePaginationProps<T
               <SelectValue placeholder={table.getState().pagination.pageSize} />
             </SelectTrigger>
             <SelectContent side="top">
-              {[10, 20, 30, 40, 50, 100].map((pageSize) => (
+              {[10, 20, 30, 40, 50].map((pageSize) => (
                 <SelectItem key={pageSize} value={`${pageSize}`}>
                   {pageSize}
                 </SelectItem>

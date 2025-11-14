@@ -1,8 +1,9 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { EyeIcon } from "lucide-react";
+import { EyeIcon, XIcon } from "lucide-react";
 import { useState } from "react";
+import type { DateRange } from "react-day-picker";
 import { toast } from "sonner";
 
 import {
@@ -23,7 +24,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table/data-table";
+import { DataTableFacetedFilter } from "@/components/ui/data-table/data-table-faceted-filter";
+import { DataTableProvider, useDataTable } from "@/components/ui/data-table/data-table-provider";
 import type { FilterField } from "@/components/ui/data-table/data-table-toolbar";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
 import {
   Dialog,
   DialogContent,
@@ -173,10 +177,58 @@ function SimTransactionHistoryTable({ simId }: { simId: number }) {
   return isFetching ? (
     <Spinner className="flex h-full w-full items-center justify-center" />
   ) : (
-    <DataTable
-      columns={simTransactionHistoryColumns}
-      data={data || []}
-      filterFields={filterFields}
-    />
+    <DataTableProvider columns={simTransactionHistoryColumns} data={data || []}>
+      <TransactionTableToolbar filterFields={filterFields} />
+      <DataTable />
+    </DataTableProvider>
+  );
+}
+
+export function TransactionTableToolbar({ filterFields }: { filterFields: FilterField[] }) {
+  const { table } = useDataTable();
+  const isFiltered = table.getState().columnFilters.length > 0;
+
+  return (
+    <div className="flex items-center justify-between mb-2">
+      <div className="flex flex-1 items-center space-x-2">
+        <Input
+          className="h-8 w-[150px] lg:w-[250px]"
+          onChange={(event) => table.getColumn("note")?.setFilterValue(event.target.value)}
+          placeholder="Search by amount, note"
+          value={(table.getColumn("note")?.getFilterValue() as string) ?? ""}
+        />
+
+        {filterFields?.map(
+          (field) =>
+            table.getColumn(field.column) && (
+              <DataTableFacetedFilter
+                column={table.getColumn(field.column)}
+                key={field.column}
+                options={field.options}
+                title={field.title}
+              />
+            ),
+        )}
+        <DateRangePicker
+          className="h-8 w-56"
+          onChange={(range) => {
+            table.getColumn("createdAt")?.setFilterValue(range);
+          }}
+          rangeType="previous"
+          value={table.getColumn("createdAt")?.getFilterValue() as DateRange}
+        />
+        {isFiltered && (
+          <Button
+            className="h-8 px-2 lg:px-3"
+            onClick={() => table.resetColumnFilters()}
+            variant="ghost"
+          >
+            Reset
+            <XIcon />
+          </Button>
+        )}
+      </div>
+      {/* <DataTableViewOptions table={table} /> */}
+    </div>
   );
 }

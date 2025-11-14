@@ -6,6 +6,8 @@ import { TanstackQueryProvider } from "@/providers/query-client-provider";
 
 import "./globals.css";
 
+import { AuthProvider } from "@/providers/auth-provider";
+
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
@@ -24,7 +26,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} ${geistMono.variable} antialiased`}>
-        <TanstackQueryProvider>{children}</TanstackQueryProvider>
+        <TanstackQueryProvider>
+          <AuthProvider>{children}</AuthProvider>
+        </TanstackQueryProvider>
         <Toaster richColors />
       </body>
     </html>

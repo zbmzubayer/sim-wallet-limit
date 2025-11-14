@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -31,6 +32,41 @@ import { SIM_TRANSACTION_OPERATION } from "@/enums/sim.enum";
 import { cn } from "@/lib/cn";
 import { getQueryClient } from "@/lib/get-query-client";
 import { type SimBalanceDto, simBalanceSchema } from "@/validations/sim.dto";
+
+// const getChargeErrorMessage = (operation: string, amount: number, charge: number) => {
+//   if (
+//     (operation === SIM_TRANSACTION_OPERATION.BK_SM ||
+//       operation === SIM_TRANSACTION_OPERATION.NG_SM) &&
+//     amount &&
+//     charge > 15
+//   )
+//     return "Max charge for SM operations is 15";
+//   if (
+//     operation === SIM_TRANSACTION_OPERATION.BK_CO &&
+//     amount &&
+//     charge > Number((amount * 0.019).toFixed(2)) // 1.9%
+//   ) {
+//     return "Max BK CO charge is 1.9%";
+//   }
+//   if (
+//     operation === SIM_TRANSACTION_OPERATION.NG_CO &&
+//     amount &&
+//     charge > Number((amount * 0.016).toFixed(2)) // 1.6%
+//   ) {
+//     return "Max NG CO charge is 1.6%";
+//   }
+//   return null;
+// };
+
+export const setAutoCharge = (operation: string, amount: number) => {
+  if (operation === SIM_TRANSACTION_OPERATION.BK_CO && amount) {
+    return Number.parseFloat((amount * 0.0185).toFixed(2)); // Auto 1.85% charge
+  }
+  if (operation === SIM_TRANSACTION_OPERATION.NG_CO && amount) {
+    return Number.parseFloat((amount * 0.0155).toFixed(2)); // Auto 1.55% charge
+  }
+  return 0;
+};
 
 interface UpdateSimBalanceFormProps {
   phone: string;
@@ -81,6 +117,11 @@ export function UpdateSimBalanceForm({
     await mutateAsync({ id: simId, payload: values });
   };
 
+  useEffect(() => {
+    const autoCharge = setAutoCharge(selectedOperation, formAmount);
+    form.setValue("charge", autoCharge);
+  }, [selectedOperation, formAmount, form]);
+
   return (
     <Form {...form}>
       <div>
@@ -90,13 +131,13 @@ export function UpdateSimBalanceForm({
         <FormField
           control={form.control}
           name="operation"
-          render={({ field }) => (
+          render={({ field: { onChange, ...fieldProps } }) => (
             <FormItem>
               <div className="flex items-center justify-between">
                 <FormLabel>Payment</FormLabel>
                 <FormMessage />
               </div>
-              <Select onValueChange={field.onChange}>
+              <Select onValueChange={onChange} {...fieldProps}>
                 <FormControl>
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select a payment" />
@@ -148,7 +189,7 @@ export function UpdateSimBalanceForm({
                   onChange={(e) => {
                     const value = e.target.value;
                     if (value === "") onChange(undefined);
-                    else onChange(Number.parseInt(value, 10));
+                    else onChange(Number.parseFloat(value));
                   }}
                   {...fieldProps}
                 />
@@ -172,7 +213,7 @@ export function UpdateSimBalanceForm({
                   onChange={(e) => {
                     const value = e.target.value;
                     if (value === "") onChange(undefined);
-                    else onChange(Number.parseInt(value, 10));
+                    else onChange(Number.parseFloat(value));
                   }}
                   {...fieldProps}
                 />

@@ -1,3 +1,5 @@
+"use client";
+
 import { TrashIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";

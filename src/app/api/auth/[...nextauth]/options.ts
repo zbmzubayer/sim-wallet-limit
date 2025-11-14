@@ -27,13 +27,17 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
+        token.id = user.id as unknown as number;
         token.username = user.username;
+        token.role = user.role;
       }
       return token;
     },
     async session({ session, token }) {
       if (token && session.user) {
+        session.user.id = token.id;
         session.user.username = token.username;
+        session.user.role = token.role;
       }
       return session;
     },
@@ -41,6 +45,7 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
   },
+  // jwt: { maxAge: 10 }, // 10 seconds for testing
   pages: {
     signIn: "/",
     error: "/",

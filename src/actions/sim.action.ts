@@ -2,16 +2,15 @@
 
 import { revalidatePath } from "next/cache";
 
+import auth from "@/auth";
+import { ENV } from "@/config/env";
 import {
   SIM_TRANSACTION_OPERATION,
   SIM_TRANSACTION_TYPE,
 } from "@/enums/sim.enum";
 import type { Prisma } from "@/generated/prisma";
 import prisma from "@/lib/prisma";
-import type {
-  SimBalanceDto,
-  SimTransactionNoteDto,
-} from "@/validations/sim.dto";
+import type { SetSimLimitDto, SimBalanceDto } from "@/validations/sim.dto";
 
 export const updateSimBalance = async ({
   id,
@@ -20,6 +19,10 @@ export const updateSimBalance = async ({
   id: number;
   payload: SimBalanceDto;
 }) => {
+  const session = await auth();
+  if (!session?.user) {
+    throw new Error("Unauthorized");
+  }
   const { operation, amount, charge } = payload;
   const simUpdateData: Prisma.SimUncheckedUpdateInput = {};
   const total = amount + charge;
@@ -54,7 +57,12 @@ export const updateSimBalance = async ({
     await Promise.all([
       tx.sim.update({ where: { id }, data: simUpdateData }),
       tx.simTransactionHistory.create({
-        data: { simId: id, type: SIM_TRANSACTION_TYPE.OUT, ...payload },
+        data: {
+          simId: id,
+          type: SIM_TRANSACTION_TYPE.OUT,
+          operatedBy: session.user.username,
+          ...payload,
+        },
       }),
     ]);
 
@@ -134,6 +142,12 @@ export const clearAllSimTransactionHistories = async () => {
   });
 };
 
+export const getAllSims = async () => {
+  return await prisma.sim.findMany({
+    include: { deviceSims: { include: { device: true } } },
+  });
+};
+
 export const getSimById = async (id: number) => {
   return await prisma.sim.findUniqueOrThrow({ where: { id } });
 };
@@ -158,57 +172,35 @@ export const updateTransactionHistory = async ({
     charge !== transaction.charge;
 
   if (isTransactionUpdated) {
-    const total = amount + charge;
-    const existingTotal = transaction.amount + transaction.charge;
+    const newTotal = amount + charge;
+    const oldTotal = transaction.amount + transaction.charge;
+    const balanceDiff = oldTotal - newTotal; // Positive = increase, Negative = decrease
+    const amountDiff = amount - transaction.amount;
 
     if (operation === SIM_TRANSACTION_OPERATION.BK_SM) {
-      simUpdateData.bkBalance = { decrement: total, increment: existingTotal };
-      simUpdateData.bkSM = { increment: amount, decrement: transaction.amount };
-      simUpdateData.bkTotalSM = {
-        increment: amount,
-        decrement: transaction.amount,
-      };
+      simUpdateData.bkBalance = { increment: balanceDiff };
+      simUpdateData.bkSM = { increment: amountDiff };
+      simUpdateData.bkTotalSM = { increment: amountDiff };
     } else if (operation === SIM_TRANSACTION_OPERATION.BK_CO) {
-      simUpdateData.bkBalance = { decrement: total, increment: existingTotal };
-      simUpdateData.bkCO = { increment: amount, decrement: transaction.amount };
-      simUpdateData.bkTotalCO = {
-        increment: amount,
-        decrement: transaction.amount,
-      };
+      simUpdateData.bkBalance = { increment: balanceDiff };
+      simUpdateData.bkCO = { increment: amountDiff };
+      simUpdateData.bkTotalCO = { increment: amountDiff };
     } else if (operation === SIM_TRANSACTION_OPERATION.BK_MER) {
-      simUpdateData.bkBalance = { decrement: total, increment: existingTotal };
-      simUpdateData.bkMER = {
-        increment: amount,
-        decrement: transaction.amount,
-      };
-      simUpdateData.bkTotalMER = {
-        increment: amount,
-        decrement: transaction.amount,
-      };
+      simUpdateData.bkBalance = { increment: balanceDiff };
+      simUpdateData.bkMER = { increment: amountDiff };
+      simUpdateData.bkTotalMER = { increment: amountDiff };
     } else if (operation === SIM_TRANSACTION_OPERATION.NG_SM) {
-      simUpdateData.ngBalance = { decrement: total, increment: existingTotal };
-      simUpdateData.ngSM = { increment: amount, decrement: transaction.amount };
-      simUpdateData.ngTotalSM = {
-        increment: amount,
-        decrement: transaction.amount,
-      };
+      simUpdateData.ngBalance = { increment: balanceDiff };
+      simUpdateData.ngSM = { increment: amountDiff };
+      simUpdateData.ngTotalSM = { increment: amountDiff };
     } else if (operation === SIM_TRANSACTION_OPERATION.NG_CO) {
-      simUpdateData.ngBalance = { decrement: total, increment: existingTotal };
-      simUpdateData.ngCO = { increment: amount, decrement: transaction.amount };
-      simUpdateData.ngTotalCO = {
-        increment: amount,
-        decrement: transaction.amount,
-      };
+      simUpdateData.ngBalance = { increment: balanceDiff };
+      simUpdateData.ngCO = { increment: amountDiff };
+      simUpdateData.ngTotalCO = { increment: amountDiff };
     } else if (operation === SIM_TRANSACTION_OPERATION.NG_MER) {
-      simUpdateData.ngBalance = { decrement: total, increment: existingTotal };
-      simUpdateData.ngMER = {
-        increment: amount,
-        decrement: transaction.amount,
-      };
-      simUpdateData.ngTotalMER = {
-        increment: amount,
-        decrement: transaction.amount,
-      };
+      simUpdateData.ngBalance = { increment: balanceDiff };
+      simUpdateData.ngMER = { increment: amountDiff };
+      simUpdateData.ngTotalMER = { increment: amountDiff };
     }
   }
 
@@ -228,20 +220,31 @@ export const updateTransactionHistory = async ({
   });
 };
 
-export async function updateTransactionHistoryNote({
-  id,
-  payload,
-}: {
-  id: number;
-  payload: SimTransactionNoteDto;
-}) {
-  await prisma.simTransactionHistory.update({ where: { id }, data: payload });
+export const getAllDevices = async () => {
+  return await prisma.device.findMany({ include: { chat: true } });
+};
+
+export const getSimLimits = async () => {
+  return {
+    bkSMLimit: ENV.BK_SM_LIMIT,
+    bkCOLimit: ENV.BK_CO_LIMIT,
+    ngSMLimit: ENV.NG_SM_LIMIT,
+    ngCOLimit: ENV.NG_CO_LIMIT,
+  };
+};
+
+export const setSimLimits = async (payload: SetSimLimitDto) => {
+  const session = await auth();
+  if (!session?.user) {
+    throw new Error("Unauthorized");
+  }
+
+  ENV.BK_SM_LIMIT = payload.bkSMLimit;
+  ENV.BK_CO_LIMIT = payload.bkCOLimit;
+  ENV.NG_SM_LIMIT = payload.ngSMLimit;
+  ENV.NG_CO_LIMIT = payload.ngCOLimit;
 
   revalidatePath("/");
 
   return true;
-}
-
-export const getAllDevices = async () => {
-  return await prisma.device.findMany({ include: { chat: true } });
 };
