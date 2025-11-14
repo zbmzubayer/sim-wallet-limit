@@ -2,20 +2,12 @@
 
 import { useMutation } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
-import { EditIcon, TrashIcon } from "lucide-react";
+import { TrashIcon } from "lucide-react";
 import { toast } from "sonner";
 
 import { deleteUser } from "@/actions/user.action";
 import { Button } from "@/components/ui/button";
 import DeleteAlertDialog from "@/components/ui/delete-alert-dialog";
-import {
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogProvider,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import type { UserTableData } from "@/types/chat";
 
 export const userColumns: ColumnDef<UserTableData>[] = [
@@ -56,7 +48,7 @@ export const userColumns: ColumnDef<UserTableData>[] = [
 
       return (
         <div className="flex justify-center gap-2">
-          <DialogProvider>
+          {/* <DialogProvider>
             <DialogTrigger asChild>
               <Button className="size-8" variant="outline">
                 <EditIcon />
@@ -67,9 +59,8 @@ export const userColumns: ColumnDef<UserTableData>[] = [
                 <DialogTitle>Edit User</DialogTitle>
                 <DialogDescription>Change the user details below.</DialogDescription>
               </DialogHeader>
-              {/* <EditProviderForm provider={row.original} /> */}
             </DialogContent>
-          </DialogProvider>
+          </DialogProvider> */}
 
           <DeleteAlertDialog onConfirm={async () => await mutateAsync()}>
             <Button className="size-8" variant="destructive">

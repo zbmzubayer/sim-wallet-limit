@@ -118,10 +118,9 @@ function getTotals(chats: ChatTableData[]) {
 export type Totals = ReturnType<typeof getTotals>;
 
 export default async function DashboardPage() {
-  const chats = await getAllChats();
+  const [chats, limits] = await Promise.all([getAllChats(), getSimLimits()]);
   const transformed = transformData(chats);
   const totals = getTotals(chats);
-  const limits = await getSimLimits();
 
   return <ChatTable transformed={transformed} totals={totals} limits={limits} />;
 }

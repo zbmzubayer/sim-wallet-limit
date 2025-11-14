@@ -6,8 +6,12 @@ import { HeaderDropdownMenu } from "@/components/layout/header-dropdown-menu";
 import { ClearAllTransactionHistoryAlertDialog } from "@/components/sim/clear-all-transaction-history-alert-dialog";
 
 export async function Header() {
-  const _session = await auth();
+  const session = await auth();
   const limits = await getSimLimits();
+
+  if (!session?.user) {
+    return null;
+  }
 
   return (
     <header className="border-b py-2 flex items-center">
@@ -16,7 +20,7 @@ export async function Header() {
           Sim Wallet Limit
         </Link>
         <ClearAllTransactionHistoryAlertDialog />
-        <HeaderDropdownMenu limits={limits} />
+        <HeaderDropdownMenu limits={limits} user={session.user} />
       </div>
     </header>
   );

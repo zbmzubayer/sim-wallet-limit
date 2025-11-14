@@ -7,8 +7,18 @@ import prisma from "@/lib/prisma";
 import type { ChangePasswordDto, CreateUserDto } from "@/validations/user.dto";
 
 export const createUser = async (payload: CreateUserDto) => {
+  const isExist = await prisma.user.findUnique({
+    where: { username: payload.username },
+    select: { id: true },
+  });
+  if (isExist) {
+    throw new Error("Username already exists");
+  }
   await prisma.user.create({ data: payload });
+
   revalidatePath("/user");
+
+  return true;
 };
 
 export const getAllUsers = async () => {

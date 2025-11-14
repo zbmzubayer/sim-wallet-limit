@@ -2,7 +2,8 @@
 
 import { LogOutIcon } from "lucide-react";
 import Link from "next/link";
-import { signOut, useSession } from "next-auth/react";
+import type { Session } from "next-auth";
+import { signOut } from "next-auth/react";
 import { useState } from "react";
 
 import { SetSimLimitForm } from "@/components/sim/set-sim-limit-form";
@@ -27,12 +28,12 @@ import { type SimLimit, USER_ROLE } from "@/types";
 
 interface HeaderDropdownMenuProps {
   limits: SimLimit;
+  user: Session["user"];
 }
 
-export function HeaderDropdownMenu({ limits }: HeaderDropdownMenuProps) {
+export function HeaderDropdownMenu({ limits, user }: HeaderDropdownMenuProps) {
   const [changePasswordOpen, setChangePasswordOpen] = useState(false);
   const [setSimLimitOpen, setSetSimLimitOpen] = useState(false);
-  const { data } = useSession();
 
   return (
     <>
@@ -46,19 +47,20 @@ export function HeaderDropdownMenu({ limits }: HeaderDropdownMenuProps) {
           <DropdownMenuItem asChild>
             <Link href="/sim">Sims</Link>
           </DropdownMenuItem>
-          {data?.user.role === USER_ROLE.superAdmin && (
+          {user.role === USER_ROLE.superAdmin && (
             <DropdownMenuItem asChild>
-              <Link href="/user">Manage users</Link>
+              <Link href="/user">Users</Link>
             </DropdownMenuItem>
           )}
           <DropdownMenuItem onSelect={() => setSetSimLimitOpen(true)}>
             Set Sim Limit
           </DropdownMenuItem>
-          {data?.user.role === USER_ROLE.admin && (
+          {user.role === USER_ROLE.admin && (
             <DropdownMenuItem onSelect={() => setChangePasswordOpen(true)}>
-              Change Password
+              Change password
             </DropdownMenuItem>
           )}
+          <DropdownMenuSeparator />
           <DropdownMenuItem
             className="text-destructive focus:text-destructive focus:bg-destructive/10"
             onClick={async () => await signOut({ callbackUrl: "/" })}
