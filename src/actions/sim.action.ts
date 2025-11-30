@@ -144,7 +144,7 @@ export const clearAllSimTransactionHistories = async () => {
 
 export const getAllSims = async () => {
   return await prisma.sim.findMany({
-    include: { deviceSims: { include: { device: true } } },
+    include: { device: true },
   });
 };
 

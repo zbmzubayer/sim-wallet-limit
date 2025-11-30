@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   type ColumnDef,
@@ -10,9 +10,10 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   type SortingState,
+  type TableOptions,
   useReactTable,
-} from '@tanstack/react-table';
-import { createContext, useContext, useState } from 'react';
+} from "@tanstack/react-table";
+import { createContext, useContext, useState } from "react";
 
 interface DataTableContextValues<TData> {
   table: ReturnType<typeof useReactTable<TData>>;
@@ -27,6 +28,8 @@ interface DataTableProviderProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   initialColumnFilters?: ColumnFiltersState;
+  initialSorting?: SortingState;
+  tableOptions?: Partial<TableOptions<TData>>;
 }
 
 export function DataTableProvider<TData, TValue>({
@@ -34,8 +37,10 @@ export function DataTableProvider<TData, TValue>({
   columns,
   data,
   initialColumnFilters = [],
+  initialSorting = [],
+  tableOptions,
 }: DataTableProviderProps<TData, TValue>) {
-  const [sorting, setSorting] = useState<SortingState>([]);
+  const [sorting, setSorting] = useState<SortingState>(initialSorting);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(initialColumnFilters);
 
   // const [isMounted, setIsMounted] = useState(false);
@@ -61,6 +66,7 @@ export function DataTableProvider<TData, TValue>({
     getPaginationRowModel: getPaginationRowModel(),
     onColumnFiltersChange: setColumnFilters,
     onSortingChange: setSorting,
+    ...tableOptions,
   });
 
   // if (!isMounted) return null;
@@ -75,7 +81,7 @@ export function DataTableProvider<TData, TValue>({
 export const useDataTable = () => {
   const context = useContext(DataTableContext);
   if (!context) {
-    throw new Error('useDataTable must be used within a DataTableProvider');
+    throw new Error("useDataTable must be used within a DataTableProvider");
   }
 
   return context;

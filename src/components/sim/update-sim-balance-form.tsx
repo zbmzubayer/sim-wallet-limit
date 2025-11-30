@@ -63,7 +63,7 @@ export const setAutoCharge = (operation: string, amount: number) => {
     return Number.parseFloat((amount * 0.0185).toFixed(2)); // Auto 1.85% charge
   }
   if (operation === SIM_TRANSACTION_OPERATION.NG_CO && amount) {
-    return Number.parseFloat((amount * 0.0155).toFixed(2)); // Auto 1.55% charge
+    return Number.parseFloat((amount * 0.015).toFixed(2)); // Auto 1.5% charge
   }
   return 0;
 };

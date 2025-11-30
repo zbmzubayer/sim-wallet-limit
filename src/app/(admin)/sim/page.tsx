@@ -1,12 +1,23 @@
+import { getCookie } from "@/actions/cookie.action";
 import { getAllSims } from "@/actions/sim.action";
+import { SimDataTable } from "@/components/sim/sim-table";
+import { simColumns } from "@/components/sim/sim-table-columns";
+import { DataTableProvider } from "@/components/ui/data-table/data-table-provider";
 
 export default async function SimPage() {
   const sims = await getAllSims();
+  const sortOrder = (await getCookie("sim_sort_order")) || "asc";
 
   return (
-    <main className="container flex h-screen flex-col items-center justify-center gap-2">
-      {/* <DataTable columns={simColumns} data={sims} /> */}
-      hi
+    <main>
+      <DataTableProvider
+        columns={simColumns}
+        data={sims}
+        initialSorting={[{ id: "lastCashedInDate", desc: sortOrder === "desc" }]}
+        tableOptions={{ enableSortingRemoval: false }}
+      >
+        <SimDataTable />
+      </DataTableProvider>
     </main>
   );
 }

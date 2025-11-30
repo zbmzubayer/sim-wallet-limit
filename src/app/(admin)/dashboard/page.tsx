@@ -11,8 +11,8 @@ function transformData(chats: ChatTableData[]) {
   // same goes for chat level
   // If a sim in certain device has the highest value, that chat should be moved to the top
   // Helper function to get the maximum balance between bkBalance and ngBalance
-  const getMaxBalance = (deviceSim: ChatTableData["devices"][number]["deviceSims"][number]) => {
-    return Math.max(deviceSim.sim.bkBalance || 0, deviceSim.sim.ngBalance || 0);
+  const getMaxBalance = (sim: ChatTableData["devices"][number]["sims"][number]) => {
+    return Math.max(sim.bkBalance || 0, sim.ngBalance || 0);
   };
 
   return chats
@@ -20,7 +20,7 @@ function transformData(chats: ChatTableData[]) {
       const sortedDevices = chat.devices
         .map((device) => {
           // Sort SIMs within each device by their maximum balance (descending)
-          const sortedSims = [...device.deviceSims].sort((a, b) => {
+          const sortedSims = [...device.sims].sort((a, b) => {
             const maxBalanceA = getMaxBalance(a);
             const maxBalanceB = getMaxBalance(b);
 
@@ -29,31 +29,30 @@ function transformData(chats: ChatTableData[]) {
             }
 
             // If max balances are equal, sort by bkBalance first, then ngBalance
-            if (a.sim.bkBalance !== b.sim.bkBalance) {
-              return b.sim.bkBalance - a.sim.bkBalance;
+            if (a.bkBalance !== b.bkBalance) {
+              return b.bkBalance - a.bkBalance;
             }
 
-            return b.sim.ngBalance - a.sim.ngBalance;
+            return b.ngBalance - a.ngBalance;
           });
 
           return {
             ...device,
-            deviceSims: sortedSims,
+            sims: sortedSims,
             rowCount: sortedSims.length,
           };
         })
         .sort((a, b) => {
           // Sort devices by their top SIM's maximum balance
-          if (a.deviceSims.length === 0) return 1;
-          if (b.deviceSims.length === 0) return -1;
+          if (a.sims.length === 0) return 1;
+          if (b.sims.length === 0) return -1;
 
-          const maxBalanceA = getMaxBalance(a.deviceSims[0]);
-          const maxBalanceB = getMaxBalance(b.deviceSims[0]);
+          const maxBalanceA = getMaxBalance(a.sims[0]);
+          const maxBalanceB = getMaxBalance(b.sims[0]);
           return maxBalanceB - maxBalanceA;
         });
 
-      const chatRowCount = sortedDevices.reduce((sum, device) => sum + device.deviceSims.length, 0);
-
+      const chatRowCount = sortedDevices.reduce((sum, device) => sum + device.sims.length, 0);
       return {
         ...chat,
         devices: sortedDevices,
@@ -62,11 +61,11 @@ function transformData(chats: ChatTableData[]) {
     })
     .sort((a, b) => {
       // Sort chats by their top device's top SIM's maximum balance
-      if (a.devices.length === 0 || a.devices[0].deviceSims.length === 0) return 1;
-      if (b.devices.length === 0 || b.devices[0].deviceSims.length === 0) return -1;
+      if (a.devices.length === 0 || a.devices[0].sims.length === 0) return 1;
+      if (b.devices.length === 0 || b.devices[0].sims.length === 0) return -1;
 
-      const maxBalanceA = getMaxBalance(a.devices[0].deviceSims[0]);
-      const maxBalanceB = getMaxBalance(b.devices[0].deviceSims[0]);
+      const maxBalanceA = getMaxBalance(a.devices[0].sims[0]);
+      const maxBalanceB = getMaxBalance(b.devices[0].sims[0]);
       return maxBalanceB - maxBalanceA;
     });
 }
@@ -86,18 +85,18 @@ function getTotals(chats: ChatTableData[]) {
 
   chats.forEach((chat) => {
     chat.devices.forEach((device) => {
-      device.deviceSims.forEach((sim) => {
-        const simKey = sim.simId;
+      device.sims.forEach((sim) => {
+        const simKey = sim.id;
         if (!simSet.has(simKey)) {
           simSet.add(simKey);
-          totalBkBalance += sim.sim.bkBalance > 0 ? sim.sim.bkBalance : 0;
-          totalNgBalance += sim.sim.ngBalance > 0 ? sim.sim.ngBalance : 0;
-          totalBK_SM += sim.sim.bkSM || 0;
-          totalBK_CO += sim.sim.bkCO || 0;
-          totalBK_MER += sim.sim.bkMER || 0;
-          totalNG_SM += sim.sim.ngSM || 0;
-          totalNG_CO += sim.sim.ngCO || 0;
-          totalNG_MER += sim.sim.ngMER || 0;
+          totalBkBalance += sim.bkBalance > 0 ? sim.bkBalance : 0;
+          totalNgBalance += sim.ngBalance > 0 ? sim.ngBalance : 0;
+          totalBK_SM += sim.bkSM || 0;
+          totalBK_CO += sim.bkCO || 0;
+          totalBK_MER += sim.bkMER || 0;
+          totalNG_SM += sim.ngSM || 0;
+          totalNG_CO += sim.ngCO || 0;
+          totalNG_MER += sim.ngMER || 0;
         }
       });
     });
