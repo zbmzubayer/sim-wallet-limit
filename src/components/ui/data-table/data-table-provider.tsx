@@ -9,6 +9,7 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  type PaginationState,
   type SortingState,
   type TableOptions,
   useReactTable,
@@ -30,6 +31,7 @@ interface DataTableProviderProps<TData, TValue> {
   initialColumnFilters?: ColumnFiltersState;
   initialSorting?: SortingState;
   tableOptions?: Partial<TableOptions<TData>>;
+  paginationOptions?: PaginationState;
 }
 
 export function DataTableProvider<TData, TValue>({
@@ -38,10 +40,14 @@ export function DataTableProvider<TData, TValue>({
   data,
   initialColumnFilters = [],
   initialSorting = [],
+  paginationOptions,
   tableOptions,
 }: DataTableProviderProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>(initialSorting);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(initialColumnFilters);
+  const [pagination, setPagination] = useState<PaginationState>(
+    paginationOptions || { pageIndex: 0, pageSize: 10 },
+  );
 
   // const [isMounted, setIsMounted] = useState(false);
 
@@ -57,6 +63,7 @@ export function DataTableProvider<TData, TValue>({
       // rowSelection,
       columnFilters,
       sorting,
+      pagination,
     },
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -66,6 +73,7 @@ export function DataTableProvider<TData, TValue>({
     getPaginationRowModel: getPaginationRowModel(),
     onColumnFiltersChange: setColumnFilters,
     onSortingChange: setSorting,
+    onPaginationChange: setPagination,
     ...tableOptions,
   });
 

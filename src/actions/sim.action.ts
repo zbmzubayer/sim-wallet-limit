@@ -144,6 +144,7 @@ export const clearAllSimTransactionHistories = async () => {
 
 export const getAllSims = async () => {
   return await prisma.sim.findMany({
+    where: { lastCashedInDate: { not: null } },
     include: { device: true },
   });
 };
@@ -221,7 +222,9 @@ export const updateTransactionHistory = async ({
 };
 
 export const getAllDevices = async () => {
-  return await prisma.device.findMany({ include: { chat: true } });
+  return await prisma.chatDevice.findMany({
+    include: { chat: true, device: true },
+  });
 };
 
 export const getSimLimits = async () => {

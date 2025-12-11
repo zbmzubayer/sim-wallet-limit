@@ -6,6 +6,7 @@ import {
   ChevronsLeftIcon,
   ChevronsRightIcon,
 } from "lucide-react";
+import type React from "react";
 
 import { Button } from "@/components/ui/button";
 import { useDataTable } from "@/components/ui/data-table/data-table-provider";
@@ -16,12 +17,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { cn } from "@/lib/cn";
 
-export function DataTablePagination() {
+export function DataTablePagination({ className, ...props }: React.ComponentProps<"div">) {
   const { table } = useDataTable();
 
   return (
-    <div className="mx-2 flex items-center justify-between">
+    <div className={cn("mx-2 flex items-center justify-between", className)} {...props}>
       <div className="flex-1 text-muted-foreground text-sm">
         {/* {table.getFilteredSelectedRowModel().rows.length} of{' '} */}
         {/* {table.getFilteredRowModel().rows.length} row(s) selected. */}
@@ -36,11 +38,11 @@ export function DataTablePagination() {
             }}
             value={`${table.getState().pagination.pageSize}`}
           >
-            <SelectTrigger className="h-8 w-[70px]">
+            <SelectTrigger className="h-8 w-[80px]">
               <SelectValue placeholder={table.getState().pagination.pageSize} />
             </SelectTrigger>
             <SelectContent side="top">
-              {[10, 20, 30, 40, 50].map((pageSize) => (
+              {[10, 20, 30, 40, 50, 100].map((pageSize) => (
                 <SelectItem key={pageSize} value={`${pageSize}`}>
                   {pageSize}
                 </SelectItem>

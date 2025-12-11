@@ -11,16 +11,16 @@ function transformData(chats: ChatTableData[]) {
   // same goes for chat level
   // If a sim in certain device has the highest value, that chat should be moved to the top
   // Helper function to get the maximum balance between bkBalance and ngBalance
-  const getMaxBalance = (sim: ChatTableData["devices"][number]["sims"][number]) => {
+  const getMaxBalance = (sim: ChatTableData["chatDevices"][number]["device"]["sims"][number]) => {
     return Math.max(sim.bkBalance || 0, sim.ngBalance || 0);
   };
 
   return chats
     .map((chat) => {
-      const sortedDevices = chat.devices
-        .map((device) => {
+      const sortedChatDevices = chat.chatDevices
+        .map((cb) => {
           // Sort SIMs within each device by their maximum balance (descending)
-          const sortedSims = [...device.sims].sort((a, b) => {
+          const sortedSims = [...cb.device.sims].sort((a, b) => {
             const maxBalanceA = getMaxBalance(a);
             const maxBalanceB = getMaxBalance(b);
 
@@ -37,35 +37,38 @@ function transformData(chats: ChatTableData[]) {
           });
 
           return {
-            ...device,
-            sims: sortedSims,
-            rowCount: sortedSims.length,
+            ...cb,
+            device: {
+              ...cb.device,
+              sims: sortedSims,
+              rowCount: sortedSims.length,
+            },
           };
         })
         .sort((a, b) => {
           // Sort devices by their top SIM's maximum balance
-          if (a.sims.length === 0) return 1;
-          if (b.sims.length === 0) return -1;
+          if (a.device.sims.length === 0) return 1;
+          if (b.device.sims.length === 0) return -1;
 
-          const maxBalanceA = getMaxBalance(a.sims[0]);
-          const maxBalanceB = getMaxBalance(b.sims[0]);
+          const maxBalanceA = getMaxBalance(a.device.sims[0]);
+          const maxBalanceB = getMaxBalance(b.device.sims[0]);
           return maxBalanceB - maxBalanceA;
         });
 
-      const chatRowCount = sortedDevices.reduce((sum, device) => sum + device.sims.length, 0);
+      const chatRowCount = sortedChatDevices.reduce((sum, cb) => sum + cb.device.sims.length, 0);
       return {
         ...chat,
-        devices: sortedDevices,
+        chatDevices: sortedChatDevices,
         rowCount: chatRowCount,
       };
     })
     .sort((a, b) => {
       // Sort chats by their top device's top SIM's maximum balance
-      if (a.devices.length === 0 || a.devices[0].sims.length === 0) return 1;
-      if (b.devices.length === 0 || b.devices[0].sims.length === 0) return -1;
+      if (a.chatDevices.length === 0 || a.chatDevices[0].device.sims.length === 0) return 1;
+      if (b.chatDevices.length === 0 || b.chatDevices[0].device.sims.length === 0) return -1;
 
-      const maxBalanceA = getMaxBalance(a.devices[0].sims[0]);
-      const maxBalanceB = getMaxBalance(b.devices[0].sims[0]);
+      const maxBalanceA = getMaxBalance(a.chatDevices[0].device.sims[0]);
+      const maxBalanceB = getMaxBalance(b.chatDevices[0].device.sims[0]);
       return maxBalanceB - maxBalanceA;
     });
 }
@@ -84,8 +87,8 @@ function getTotals(chats: ChatTableData[]) {
   let totalNG_MER = 0;
 
   chats.forEach((chat) => {
-    chat.devices.forEach((device) => {
-      device.sims.forEach((sim) => {
+    chat.chatDevices.forEach((cb) => {
+      cb.device.sims.forEach((sim) => {
         const simKey = sim.id;
         if (!simSet.has(simKey)) {
           simSet.add(simKey);

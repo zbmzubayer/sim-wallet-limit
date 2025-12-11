@@ -5,7 +5,7 @@ import prisma from "@/lib/prisma";
 export const getAllChats = async () => {
   return await prisma.chat.findMany({
     include: {
-      devices: { include: { sims: true } },
+      chatDevices: { include: { device: { include: { sims: true } } } },
     },
     orderBy: { id: "desc" },
   });

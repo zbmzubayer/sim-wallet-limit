@@ -6,7 +6,9 @@ import type {
 } from "@/generated/prisma";
 
 export type ChatTableData = Prisma.ChatGetPayload<{
-  include: { devices: { include: { sims: true } } };
+  include: {
+    chatDevices: { include: { device: { include: { sims: true } } } };
+  };
 }>;
 
 export type TransactionHistory = SimTransactionHistory;

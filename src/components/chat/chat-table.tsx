@@ -52,15 +52,15 @@ export function ChatTable({ transformed, totals, limits }: ChatTableProps) {
     return transformed
       .map((chat) => {
         let rowCount = 0;
-        const filteredDeviceSims = chat.devices
-          .filter((device) => selectedValues.includes(device.id))
-          .map((device) => {
-            rowCount += device.sims.length;
-            return device;
+        const filteredDeviceSims = chat.chatDevices
+          .filter((cb) => selectedValues.includes(cb.id))
+          .map((cb) => {
+            rowCount += cb.device.sims.length;
+            return cb;
           });
-        return { ...chat, devices: filteredDeviceSims, rowCount };
+        return { ...chat, chatDevices: filteredDeviceSims, rowCount };
       })
-      .filter((chat) => chat.devices.length > 0);
+      .filter((chat) => chat.chatDevices.length > 0);
   }, [selectedValues, transformed]);
 
   return (
@@ -83,7 +83,7 @@ export function ChatTable({ transformed, totals, limits }: ChatTableProps) {
                     const isSelected = selectedValues.includes(item.id);
                     return (
                       <CommandItem
-                        key={item.deviceNo}
+                        key={item.id}
                         onSelect={() => {
                           if (isSelected) {
                             setSelectedValues((prev) => prev.filter((v) => v !== item.id));
@@ -103,7 +103,7 @@ export function ChatTable({ transformed, totals, limits }: ChatTableProps) {
                           <CheckIcon className="size-4 text-primary-foreground" />
                         </div>
                         <div className="flex items-center gap-1">
-                          <span>DS-{item.deviceNo}</span>
+                          <span>DS-{item.device.deviceNo}</span>
                           <span className="text-muted-foreground text-xs">({item.chat.title})</span>
                         </div>
                       </CommandItem>
@@ -176,13 +176,13 @@ export function ChatTable({ transformed, totals, limits }: ChatTableProps) {
           <TableBody>
             {filteredDevices.length ? (
               filteredDevices.map((chat) =>
-                chat.devices.map((device, dIndex) =>
-                  device.sims.map((sim, sIndex) => (
+                chat.chatDevices.map((cb, dIndex) =>
+                  cb.device.sims.map((sim, sIndex) => (
                     <TableRow
                       key={sim.id}
                       className={cn(
                         "hover:bg-muted/50",
-                        sIndex === device.sims.length - 1 && "border-b border-black",
+                        sIndex === cb.device.sims.length - 1 && "border-b border-black",
                       )}
                     >
                       {/* Chat title with rowspan */}
@@ -193,14 +193,14 @@ export function ChatTable({ transformed, totals, limits }: ChatTableProps) {
                       {/* Device no with rowspan */}
                       {sIndex === 0 && (
                         <TableCell
-                          rowSpan={device.rowCount}
+                          rowSpan={cb.device.sims.length}
                           style={{
-                            borderColor: `var(--device-color-${device.deviceNo})`,
-                            backgroundColor: `color-mix(in srgb, var(--device-color-${device.deviceNo}) 20%, transparent)`,
+                            borderColor: `var(--device-color-${cb.device.deviceNo})`,
+                            backgroundColor: `color-mix(in srgb, var(--device-color-${cb.device.deviceNo}) 20%, transparent)`,
                           }}
                           className="border-l-4"
                         >
-                          DS-{device.deviceNo}
+                          DS-{cb.device.deviceNo}
                         </TableCell>
                       )}
 
@@ -210,7 +210,7 @@ export function ChatTable({ transformed, totals, limits }: ChatTableProps) {
                         className="p-0"
                       >
                         <UpdateSimBalanceDialog
-                          deviceNo={device.deviceNo}
+                          deviceNo={cb.device.deviceNo}
                           simNo={sim.simNo}
                           phone={sim.phone}
                           simId={sim.id}
@@ -220,7 +220,7 @@ export function ChatTable({ transformed, totals, limits }: ChatTableProps) {
                       </TableCell>
                       <TableCell className="flex justify-center">
                         <SimTransactionHistoryDialog
-                          deviceNo={device.deviceNo}
+                          deviceNo={cb.device.deviceNo}
                           simNo={sim.simNo}
                           simId={sim.id}
                           bkTotalSM={sim.bkTotalSM}

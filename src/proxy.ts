@@ -21,9 +21,6 @@ export default async function middleware(
     const token = await getToken({ req, secret: ENV.AUTH_SECRET });
     if (token) {
       const isAuthorized = await isUserAuthorized(token.username);
-      console.log(
-        `User ${token.username} authorization status: ${isAuthorized}`
-      );
       if (!isAuthorized) {
         (await cookies()).delete("next-auth.session-token");
         return NextResponse.redirect(new URL("/", req.nextUrl));
@@ -75,5 +72,4 @@ export const config = {
     // Always run for API routes
     "/(api|trpc)(.*)",
   ],
-  runtime: "nodejs",
 };
